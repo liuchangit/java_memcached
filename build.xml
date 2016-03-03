@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+
+<project name="" basedir="." default="dist">
+
+	<property name="name" value="java_memcached" />
+
+	<property name="version" value="1.0" />
+
+	<property name="src.dir" value="src" />
+	<property name="test.dir" value="test" />
+	<property name="conf.dir" value="conf" />
+	<property name="lib.dir" value="lib" />
+	<property name="sh.dir" value="sh" />
+
+	<property name="build.dir" value="build" />
+	<property name="src.classes.dir" value="${build.dir}/src_classes" />
+	<property name="test.classes.dir" value="${build.dir}/test_classes" />
+	<property name="test.output.dir" value="${build.dir}/test_output" />
+
+	<property name="dist.dir" value="dist" />
+
+	<property file="build.properties" />
+
+
+	<path id="build-classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean" description="Clean output dirs (build, dist)">
+
+		<delete dir="${build.dir}" />
+		<delete dir="${src.classes.dir}" />
+		<delete dir="${test.classes.dir}" />
+		<delete dir="${test.output.dir}" />
+		<delete dir="${dist.dir}" />
+
+	</target>
+
+	<target name="init" depends="clean" description="Make build and dist dirs">
+
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${src.classes.dir}" />
+		<mkdir dir="${test.classes.dir}" />
+		<mkdir dir="${test.output.dir}" />
+		<mkdir dir="${dist.dir}" />
+
+	</target>
+
+	<target name="compile" depends="init" description="Compile source code">
+		<javac destdir="${src.classes.dir}" source="1.7" target="1.7" debug="true" deprecation="true" optimize="true" failonerror="true" encoding="UTF-8">
+			<src path="${src.dir}" />
+			<classpath refid="build-classpath" />
+		</javac>
+	</target>
+
+	<target name="junit" depends="compile" description="Run junit tests">
+		<javac destdir="${test.classes.dir}" source="1.7" target="1.7" debug="true" deprecation="true" optimize="true" failonerror="true" encoding="UTF-8">
+			<src path="${test.dir}" />
+			<classpath refid="build-classpath" />
+			<classpath path="${src.classes.dir}" />
+		</javac>
+
+		<copy todir="${test.classes.dir}">
+			<fileset dir="${test.dir}" excludes="**/*.java" />
+		</copy>
+
+		<junit printsummary="yes" haltonfailure="no" fork="yes" dir="${basedir}" errorproperty="tests.failed" failureproperty="tests.failed" maxmemory="100m">
+
+			<classpath refid="build-classpath" />
+			<classpath path="${src.classes.dir}" />
+			<classpath path="${test.classes.dir}" />
+			<classpath path="${conf.dir}" />
+
+			<formatter type="plain" />
+
+			<batchtest todir="${test.output.dir}">
+				<fileset dir="${test.dir}" includes="**/*Test.java" />
+			</batchtest>
+		</junit>
+
+		<fail if="tests.failed">Unit Tests failed!</fail>
+	</target>
+
+	<target name="jar" depends="compile" description="Build jar file">
+
+		<jar jarfile="${build.dir}/${name}.jar" compress="true">
+			<fileset dir="${src.classes.dir}">
+				<include name="**/*" />
+			</fileset>
+			<fileset dir="${src.dir}">
+				<include name="**/*" />
+			</fileset>
+		</jar>
+
+	</target>
+
+	<target name="tar" depends="jar" description="Build tar file">
+		<tar destfile="${dist.dir}/${name}_${version}.tar.gz" compression="gzip">
+			<tarfileset dir="${sh.dir}" prefix="${name}_${version}">
+				<include name="**" />
+			</tarfileset>
+			<tarfileset dir="${conf.dir}" prefix="${name}_${version}/conf">
+				<include name="**" />
+			</tarfileset>
+			<tarfileset dir="${lib.dir}" prefix="${name}_${version}/lib">
+				<include name="*.jar" />
+			</tarfileset>
+			<tarfileset dir="${build.dir}" prefix="${name}_${version}/lib">
+				<include name="*.jar" />
+			</tarfileset>
+		</tar>
+
+	</target>
+
+	<target name="dist" depends="tar" />
+
+</project>
