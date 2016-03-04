@@ -3,21 +3,21 @@ README
 简介：
 该程序是用Java实现的一个memcached服务器的简化版本。功能包括：
 1. 实现了memcached文本协议，不支持二进制协议。目前仅实现了get、set和delete命令，其它命令暂不支持。协议参照此处：https://github.com/memcached/memcached/blob/master/doc/protocol.txt
-2. 具备错误处理，如果命令格式、参数个数/长度、参数取值的校验等。
+2. 具备错误处理，如：命令格式、参数个数/长度、参数取值的校验等。
 3. 通过客户端序列化，可支持存储各种数据类型，如字符串、二进制、POJO等。
 4. 支持key和value的长度限制（可配置），默认key<255，value<10M。
 5. 支持内存限制(字节数)及Cache数据置换(LRU策略)。
-6. 支持数据过期机制（时间戳或相对当前时间）。
+6. 支持数据过期机制（时间戳或相对于当前时间偏移）。
 7. 支持长连接，支持多客户端并发访问。
 8. 服务器端基于NIO实现（未使用开源组件），可多线程处理get、set和delete请求，线程数可配置。
 
 使用说明：
 
-1.打包
-ant
-
-2.单元测试
+1.单元测试
 ant junit
+
+2.打包
+ant
 
 3.解压
 tar -zxf java_memcached_{version}.tar.gz
